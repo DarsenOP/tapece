@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 env/
 venv/
-node_modules/
+frontend/node_modules/
+frontend/build/
 # For frontend
 .DS_Store
