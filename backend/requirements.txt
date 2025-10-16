@@ -4,3 +4,6 @@ networkx==3.5
 numpy==2.3.4
 # Dev tools (optional but standard)
 pytest==8.4.2  # For running solver tests
+# Flask
+flask==3.1.2
+requests==2.32.5
