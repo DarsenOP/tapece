@@ -1,0 +1,8 @@
+# Existing + additions
+__pycache__/
+*.pyc
+env/
+venv/
+node_modules/
+# For frontend
+.DS_Store

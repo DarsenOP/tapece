@@ -1,0 +1,6 @@
+sympy==1.14.0
+networkx==3.5
+# For future numerical solves or testing
+numpy==2.3.4
+# Dev tools (optional but standard)
+pytest==8.4.2  # For running solver tests
