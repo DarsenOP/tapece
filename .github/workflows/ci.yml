@@ -40,14 +40,3 @@ jobs:
           cd frontend
           npm run build  # Vite production build (verifies compat)
           echo "Frontend build OK"  # Stub; add npm test later with Vitest
-
-  compatibility:
-    needs: [backend, frontend]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Versions compatibility check
-        run: |
-          echo "Cross-stack versions verified in prior jobs"
-          echo "Frontend React/Konva compatible with Node 22; Backend SymPy/NetworkX with Python 3.13"
-          echo "Manual e2e: Frontend npm run dev + backend python stub works locally (JSON proxy-ready)"
