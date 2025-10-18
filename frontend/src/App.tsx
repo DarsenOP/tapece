@@ -34,24 +34,17 @@ interface ComponentCardProps {
   component: Component;
   onDelete: (id: number) => void;
   onUpdate: (id: number, updatedComponent: Component) => void;
-  isDeleting?: boolean;
 }
 
 // --- Mock Data ---
 const initialComponents: Component[] = [
-  { id: 1, type: 'Resistor', value: '100', prefix: 'k', unit: 'Ω', nodeA: '1', nodeB: '2' },
-  { id: 2, type: 'Capacitor', value: '10', prefix: 'µ', unit: 'F', nodeA: '2', nodeB: '3' },
-  { id: 3, type: 'Inductor', value: '5', prefix: 'm', unit: 'H', nodeA: '3', nodeB: 'GND' },
-  { id: 4, type: 'Voltage Source', value: '12', prefix: 'none', unit: 'V', nodeA: 'GND', nodeB: '1' },
-  { id: 5, type: 'Resistor', value: '50', prefix: 'none', unit: 'Ω', nodeA: '1', nodeB: '4' },
-  { id: 6, type: 'Capacitor', value: '1', prefix: 'p', unit: 'F', nodeA: '4', nodeB: 'GND' },
-  { id: 7, type: 'Inductor', value: '10', prefix: 'k', unit: 'H', nodeA: '3', nodeB: '4' },
+  { id: 1, type: 'Resistor', value: '1000', prefix: '', unit: 'Ω', nodeA: '1', nodeB: '2' },
+  { id: 2, type: 'Resistor', value: '2000', prefix: '', unit: 'Ω', nodeA: '2', nodeB: '3' },
+  { id: 3, type: 'Voltage Source', value: '12', prefix: '', unit: 'V', nodeA: 'GND', nodeB: '1' },
 ];
 
 const componentOptions: ComponentOption[] = [
   { name: 'Resistor', unit: 'Ω' },
-  { name: 'Capacitor', unit: 'F' },
-  { name: 'Inductor', unit: 'H' },
   { name: 'Voltage Source', unit: 'V' },
   { name: 'Current Source', unit: 'A' },
 ];
@@ -61,11 +54,24 @@ const prefixes: Prefix[] = [
   { label: 'n', value: 'n' },
   { label: 'µ', value: 'µ' },
   { label: 'm', value: 'm' },
-  { label: '', value: 'none' },
+  { label: '', value: '' },
   { label: 'k', value: 'k' },
   { label: 'M', value: 'M' },
-  { label: 'G', value: 'G' },
 ];
+
+// --- Helper Functions ---
+const getPrefixMultiplier = (prefix: string): number => {
+  const multipliers: { [key: string]: number } = {
+    'p': 1e-12,
+    'n': 1e-9,
+    'µ': 1e-6,
+    'm': 1e-3,
+    '': 1,
+    'k': 1e3,
+    'M': 1e6,
+  };
+  return multipliers[prefix] || 1;
+};
 
 // --- Helper Components ---
 const PrefixSelector: React.FC<PrefixSelectorProps> = memo(({ selectedPrefix, onSelect }) => {
@@ -92,7 +98,6 @@ const ComponentCard: React.FC<ComponentCardProps> = memo(({
   component, 
   onDelete, 
   onUpdate,
-  isDeleting = false 
 }) => {
   const handleDelete = () => onDelete(component.id);
 
@@ -101,7 +106,7 @@ const ComponentCard: React.FC<ComponentCardProps> = memo(({
   };
 
   return (
-    <div className={`component-card ${isDeleting ? 'deleting' : ''}`}>
+    <div className="component-card">
       <div className="card-header">
         <span className="comp-label">{component.type}</span>
         <button className="delete-btn" onClick={handleDelete} title="Remove Component">
@@ -161,6 +166,41 @@ const ComponentCard: React.FC<ComponentCardProps> = memo(({
   );
 });
 
+// --- Theme Toggle Component ---
+const ThemeToggle: React.FC<{ isDark: boolean; onToggle: () => void }> = memo(({ isDark, onToggle }) => {
+  return (
+    <button 
+      className="theme-toggle-btn"
+      onClick={onToggle}
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      <div className="theme-toggle-icons">
+        {/* Sun Icon */}
+        <svg className={`sun-icon ${isDark ? 'active' : ''}`} viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="1.5" fill="currentColor"/>
+          <line x1="12" y1="1" x2="12" y2="4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="12" y1="20" x2="12" y2="23" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="1" y1="12" x2="4" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="20" y1="12" x2="23" y2="12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+        </svg>
+        
+        {/* Moon Icon */}
+        <svg className={`moon-icon ${!isDark ? 'active' : ''}`} viewBox="0 0 24 24" fill="none">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" 
+                stroke="currentColor" 
+                strokeWidth="1.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                fill="currentColor"/>
+        </svg>
+      </div>
+    </button>
+  );
+});
 // --- Main Application Component ---
 const App: React.FC = () => {
   // State
@@ -169,15 +209,13 @@ const App: React.FC = () => {
   const [displayedSolution, setDisplayedSolution] = useState<string>('');
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isMenuVisible, setIsMenuVisible] = useState<boolean>(false);
-  const [nextId, setNextId] = useState<number>(8);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [nextId, setNextId] = useState<number>(4);
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [isGridAnimating, setIsGridAnimating] = useState<boolean>(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
 
   // Constants
   const UNMOUNT_DELAY_MS = 500;
   const TYPING_SPEED_MS = 10;
-  const DELETION_ANIMATION_MS = 300;
 
   // Effects
   useEffect(() => {
@@ -206,8 +244,13 @@ const App: React.FC = () => {
     return () => clearInterval(typingInterval);
   }, [isTyping, solution]);
 
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
+
   // Event Handlers
-  const handleAddComponent = (type: string, unit: string) => {
+  const handleAddComponent = useCallback((type: string, unit: string) => {
     if (components.length >= MAX_COMPONENTS) {
       alert(`Maximum of ${MAX_COMPONENTS} components allowed.`);
       return;
@@ -217,124 +260,157 @@ const App: React.FC = () => {
       id: nextId,
       type,
       value: '1',
-      prefix: 'none',
+      prefix: '',
       unit,
-      nodeA: String(nextId),
-      nodeB: String(nextId + 1),
+      nodeA: '1',
+      nodeB: '2',
     };
 
     setComponents(prev => [...prev, newComponent]);
     setNextId(prev => prev + 1);
     setIsMenuOpen(false);
-  };
+  }, [components.length, nextId]);
 
   const handleDeleteComponent = useCallback((idToDelete: number) => {
-    if (isGridAnimating) return;
-
-    setIsGridAnimating(true);
-    setDeletingId(idToDelete);
-
-    setTimeout(() => {
-      setComponents(prev => prev.filter(c => c.id !== idToDelete));
-      setDeletingId(null);
-      setTimeout(() => setIsGridAnimating(false), 100);
-    }, DELETION_ANIMATION_MS);
-  }, [isGridAnimating]);
+    setComponents(prev => prev.filter(c => c.id !== idToDelete));
+  }, []);
 
   const handleUpdateComponent = useCallback((id: number, updatedComponent: Component) => {
     setComponents(prev => prev.map(c => c.id === id ? updatedComponent : c));
   }, []);
 
-  const handleSolve = () => {
-    const totalR = components.filter(c => c.type === 'Resistor').length;
-    const totalC = components.filter(c => c.type === 'Capacitor').length;
+  const handleCleanAll = useCallback(() => {
+    if (components.length === 0) return;
     
-    const newSolution = 
-      `Analysis Complete (60 Hz):\n\n` +
-      `Component Count: ${totalR} Resistors, ${totalC} Capacitors\n` +
-      `Key Metric: Total Impedance Z = 1.25 kΩ ∠-15°\n` +
-      `\n` +
-      `Detailed Calculation:\n` +
-      `Z = √(R_eq² + (X_L - X_C)²)\n\n` + 
-      `where R_eq is the equivalent resistance.`;
+    if (window.confirm('Are you sure you want to delete all components?')) {
+      setComponents([]);
+      setSolution('');
+      setDisplayedSolution('');
+    }
+  }, [components.length]);
 
-    setSolution(newSolution);
+  const handleSolve = useCallback(() => {
+    const circuitData = {
+      components: components.map(comp => ({
+        type: comp.type,
+        value: parseFloat(comp.value) * getPrefixMultiplier(comp.prefix),
+        nodeA: comp.nodeA,
+        nodeB: comp.nodeB,
+        unit: comp.unit
+      }))
+    };
+
+    console.log('Sending to backend:', circuitData);
+
+    const mockSolution = 
+      `Circuit Analysis Results:\n\n` +
+      `Components:\n${components.map(comp => 
+        `- ${comp.type}: ${comp.value} ${comp.prefix}${comp.unit} between nodes ${comp.nodeA} and ${comp.nodeB}`
+      ).join('\n')}\n\n` +
+      `Matrix Equation:\n` +
+      `[G][V] = [I]\n\n` +
+      `Where:\n` +
+      `- G is the conductance matrix\n` +
+      `- V is the node voltage vector\n` +
+      `- I is the current source vector\n\n` +
+      `Node Voltages:\n` +
+      `V1 = 12.00 V\n` +
+      `V2 = 8.57 V\n` +
+      `V3 = 4.29 V\n\n` +
+      `Ready for real backend integration!`;
+
+    setSolution(mockSolution);
     setDisplayedSolution('');
     setIsTyping(true);
-  };
+  }, [components]);
 
-  // Derived State
+  const handleThemeToggle = useCallback(() => {
+    setIsDarkMode(prev => !prev);
+  }, []);
+
   const isClosing = isMenuVisible && !isMenuOpen;
 
   return (
-    <div className="container">
-      {/* Left Panel - Component Inputs */}
-      <div className="panel left-panel">
-        <h2>Circuit Component Bank ({components.length}/{MAX_COMPONENTS})</h2>
-        
-        <div className={`components-grid ${isGridAnimating ? 'grid-animating' : ''}`}>
-          {components.map(comp => (
-            <ComponentCard 
-              key={comp.id}
-              component={comp} 
-              onDelete={handleDeleteComponent} 
-              onUpdate={handleUpdateComponent}
-              isDeleting={deletingId === comp.id}
-            />
-          ))}
+    <div className="app-container">
+      <ThemeToggle isDark={isDarkMode} onToggle={handleThemeToggle} />
+      
+      <div className="container">
+        {/* Left Panel - Component Inputs */}
+        <div className="panel left-panel">
+          <h2>Circuit Component Bank ({components.length}/{MAX_COMPONENTS})</h2>
+          
+          <div className="components-grid">
+            {components.map(comp => (
+              <ComponentCard 
+                key={comp.id}
+                component={comp} 
+                onDelete={handleDeleteComponent} 
+                onUpdate={handleUpdateComponent}
+              />
+            ))}
+          </div>
+
+          <button className="action-button solve-btn" onClick={handleSolve}>
+            Solve Circuit
+          </button>
+
+          <button 
+            className="action-button clean-btn" 
+            onClick={handleCleanAll}
+            disabled={components.length === 0}
+            title="Delete all components"
+          >
+            Clean All
+          </button>
+
+          <button 
+            className="add-btn" 
+            onClick={() => setIsMenuOpen(true)} 
+            title="Add Component"
+            disabled={components.length >= MAX_COMPONENTS}
+          >
+            +
+          </button>
+
+          {/* Add Component Menu */}
+          {isMenuVisible && (
+            <div 
+              className={`menu-backdrop ${isClosing ? 'closing' : ''}`} 
+              onClick={() => setIsMenuOpen(false)}
+            >
+              <div 
+                className={`menu-popup ${isClosing ? 'closing' : ''}`}
+                onClick={(e) => e.stopPropagation()} 
+              >
+                <h3>Add Component</h3>
+                <ul className="menu-list">
+                  {componentOptions.map((option) => (
+                    <li 
+                      key={option.name} 
+                      className="menu-item" 
+                      onClick={() => handleAddComponent(option.name, option.unit)}
+                    >
+                      {option.name} ({option.unit})
+                    </li>
+                  ))}
+                </ul>
+                <button className="action-button close-menu-btn" onClick={() => setIsMenuOpen(false)}>
+                  Close
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <button className="action-button solve-btn" onClick={handleSolve}>
-          Solve Circuit
-        </button>
-
-        <button 
-          className="add-btn" 
-          onClick={() => setIsMenuOpen(true)} 
-          title="Add Component"
-          disabled={components.length >= MAX_COMPONENTS}
-        >
-          +
-        </button>
-
-        {/* Add Component Menu */}
-        {isMenuVisible && (
-          <div 
-            className={`menu-backdrop ${isClosing ? 'closing' : ''}`} 
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <div 
-              className={`menu-popup ${isClosing ? 'closing' : ''}`}
-              onClick={(e) => e.stopPropagation()} 
-            >
-              <h3>Add Component</h3>
-              <ul className="menu-list">
-                {componentOptions.map((option) => (
-                  <li 
-                    key={option.name} 
-                    className="menu-item" 
-                    onClick={() => handleAddComponent(option.name, option.unit)}
-                  >
-                    {option.name} ({option.unit})
-                  </li>
-                ))}
-              </ul>
-              <button className="action-button close-menu-btn" onClick={() => setIsMenuOpen(false)}>
-                Close
-              </button>
-            </div>
+        {/* Right Panel - Solution Output */}
+        <div className="panel right-panel">
+          <h2>Circuit Analysis Output</h2>
+          <div className="solution-text">
+            <span className={isTyping ? "typing-active" : ""}>
+              {displayedSolution}
+              {isTyping && <span className="typing-cursor">|</span>}
+            </span>
           </div>
-        )}
-      </div>
-
-      {/* Right Panel - Solution Output */}
-      <div className="panel right-panel">
-        <h2>Circuit Analysis Output</h2>
-        <div className="solution-text">
-          <span className={isTyping ? "typing-active" : ""}>
-            {displayedSolution}
-            {isTyping && <span className="typing-cursor">|</span>}
-          </span>
         </div>
       </div>
     </div>
