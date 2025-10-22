@@ -187,15 +187,6 @@ const NodeIcon = () => (
   </svg>
 );
 
-const SupernodeIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-    <circle cx="8" cy="12" r="3"/>
-    <circle cx="16" cy="12" r="3"/>
-    <path d="M11 12H13M8 12H16" strokeLinecap="round"/>
-    <path d="M5 12H8M16 12H19" strokeLinecap="round" strokeDasharray="2 2"/>
-  </svg>
-);
-
 const ComponentIcon = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
     <rect x="3" y="3" width="18" height="18" rx="2"/>
